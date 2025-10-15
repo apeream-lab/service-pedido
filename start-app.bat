@@ -1,0 +1,13 @@
+@echo off
+echo Iniciando aplicacion Spring Boot...
+echo.
+echo Limpiando proyecto...
+call mvnw.cmd clean -q
+echo.
+echo Compilando proyecto...
+call mvnw.cmd compile -q
+echo.
+echo Ejecutando aplicacion...
+call mvnw.cmd spring-boot:run
+pause
+
