@@ -159,6 +159,44 @@ kafka.topic.pedidos=pedidos
 #### 🧠 Nota:
 La IP 172.24.119.148 corresponde a la dirección del entorno WSL.
 
+## 🧩 Verificar el Tópico `pedidos`
+
+Antes de ejecutar el programa de este laboratorio, es necesario asegurarse de que el **tópico `pedidos`** exista en el clúster de Kafka.  
+Este tópico es el canal de mensajería donde el productor publica los pedidos y el consumidor los procesa.
+
+---
+
+### 🔍 Verificar la existencia del tópico
+
+En el entorno **WSL**, con los contenedores de Kafka levantados mediante `podman-compose`, ejecutar el siguiente comando dentro del contenedor `kafka1`:
+
+```bash
+podman exec -it kafka1 kafka-topics --bootstrap-server localhost:29092 --list
+```
+
+Si el tópico no aparece en la lista anterior, créalo manualmente ejecutando este comando dentro del mismo contenedor kafka1:
+### ⚙️ Crear el tópico pedidos (si no existe)
+
+```bash
+podman exec -it kafka1 kafka-topics \
+  --bootstrap-server localhost:29092 \
+  --create \
+  --topic pedidos \
+  --partitions 2 \
+  --replication-factor 2
+```
+
+### 🔎 3️⃣ Confirmar la creación del tópico
+
+Para validar que se creó correctamente:
+
+```bash
+podman exec -it kafka1 kafka-topics \
+  --bootstrap-server localhost:29092 \
+  --describe \
+  --topic pedidos
+```
+
 ## 🚀 Operación
 ### Levantar Kafka en Podman
 ```bash
