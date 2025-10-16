@@ -17,13 +17,10 @@ import java.util.Map;
 
 @EnableKafka
 @Configuration
-public class FacturacionConsumerConfig {
+public class KafkaConsumerConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
-
-    @Value("${spring.kafka.consumer.group-id}")
-    private String groupId;
 
     @Bean
     public ConsumerFactory<String, Pedido> pedidoConsumerFactory() {
@@ -32,7 +29,7 @@ public class FacturacionConsumerConfig {
 
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, KafkaConstants.GROUP_ID_FACTURACION);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

@@ -2,12 +2,16 @@ package com.dian.service.pedido.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dian.service.pedido.dto.RequestPedido;
 import com.dian.service.pedido.model.Pedido;
 
 @Service
 public class PedidoService {
+    private static final Logger logger = LoggerFactory.getLogger(PedidoService.class);
+
     @Autowired
     private KafkaProducerService kafkaProducerService;
 
@@ -20,26 +24,12 @@ public class PedidoService {
             pedidoRegistrado.setCantidad(pedido.getCantidad());
             pedidoRegistrado.setPrecio(pedido.getPrecio());
             pedidoRegistrado.setUsuario(pedido.getUsuario());
-
-            // Simular procesamiento del pedido (sin Kafka)
-            System.out.println("=====================================");
-            System.out.println("              PEDIDO REGISTRADO");
-            System.out.println("=====================================");
-            System.out.println("ID Pedido: " + pedidoRegistrado.getId());
-            System.out.println("Cliente: " + pedidoRegistrado.getUsuario().getNombre() + " "
-                    + pedidoRegistrado.getUsuario().getApellido());
-            System.out.println("Producto: " + pedidoRegistrado.getProducto());
-            System.out.println("Cantidad: " + pedidoRegistrado.getCantidad());
-            System.out.println("Precio: $" + pedidoRegistrado.getPrecio());
-            System.out.println("Total: $" + (pedidoRegistrado.getCantidad() * pedidoRegistrado.getPrecio()));
-            System.out.println("=====================================");
-
-            // TODO: Enviar el pedido a Kafka cuando esté disponible
+            logger.info("Request transformado en pedido: " + pedidoRegistrado);
             this.kafkaProducerService.enviarPedido(pedidoRegistrado);
 
             return "Pedido registrado exitosamente. ID: " + pedido.getId();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error al registrar el pedido", e);
 
             return "Error al registrar el pedido: " + e.getMessage();
 
