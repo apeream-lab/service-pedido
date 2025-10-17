@@ -2,6 +2,9 @@ package com.dian.service.pedido.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,17 +20,18 @@ public class PedidoService {
 
     public String registrarPedido(RequestPedido pedido) {
         try {
-            // Crear el objeto Pedido (sin enviar a Kafka por ahora)
             Pedido pedidoRegistrado = new Pedido();
-            pedidoRegistrado.setId(pedido.getId());
+            pedidoRegistrado.setId(UUID.randomUUID().toString());
             pedidoRegistrado.setProducto(pedido.getProducto());
             pedidoRegistrado.setCantidad(pedido.getCantidad());
             pedidoRegistrado.setPrecio(pedido.getPrecio());
-            pedidoRegistrado.setUsuario(pedido.getUsuario());
+            pedidoRegistrado.setCliente(pedido.getCliente());
+            pedidoRegistrado.setCorreo(pedido.getCorreo());
             logger.info("Request transformado en pedido: " + pedidoRegistrado);
             this.kafkaProducerService.enviarPedido(pedidoRegistrado);
 
-            return "Pedido registrado exitosamente. ID: " + pedido.getId();
+            return "Pedido registrado exitosamente. " + pedido.getCantidad() + " unidades de " + pedido.getProducto()
+                    + "ID: " + pedidoRegistrado.getId();
         } catch (Exception e) {
             logger.error("Error al registrar el pedido", e);
 
