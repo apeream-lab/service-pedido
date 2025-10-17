@@ -182,7 +182,7 @@ CREATE TABLE IF NOT EXISTS pedidos (
 );
 ```
 
-Cuando se levante el contenedor por primera vez, Postgres ejecutará automáticamente todos los scripts .sql en ./initdb.
+Cuando se cree el contenedor por primera vez, Postgres ejecutará automáticamente todos los scripts .sql en ./initdb.
 Los scripts solo se ejecutan la primera vez que se inicializa el volumen pgdata.
 Si ya existe la base de datos, se debe eliminar el volumen para reejecutarlos:
 
@@ -306,11 +306,6 @@ Se verifica la existencia de la tabla pedido con la siguiente instrucción
 ```bash
 podman exec -it postgres psql -U demo -d demo -c "\d pedidos"
 ```
-Se verifica la existencia de la tabla pedido con la siguiente instrucción
-```bash
-podman exec -it postgres psql -U demo -d demo -c "\d pedidos"
-```
-
 ##### Crear JDBC Sink Connect
 Crear el conector con la instrucción siguiente
 ```bash
