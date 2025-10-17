@@ -31,7 +31,7 @@ public class PedidoService {
             this.kafkaProducerService.enviarPedido(pedidoRegistrado);
 
             return "Pedido registrado exitosamente. " + pedido.getCantidad() + " unidades de " + pedido.getProducto()
-                    + "ID: " + pedidoRegistrado.getId();
+                    + ". Creado con ID: " + pedidoRegistrado.getId();
         } catch (Exception e) {
             logger.error("Error al registrar el pedido", e);
 
