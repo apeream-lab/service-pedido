@@ -171,11 +171,13 @@ Para crear automáticamente la tabla de pedidos es necesario crear la carpeta in
 
 ```sql
 CREATE TABLE IF NOT EXISTS pedidos (
-    id SERIAL PRIMARY KEY,
-    producto VARCHAR(100) NOT NULL,
+    id VARCHAR(100) PRIMARY KEY,
+    producto VARCHAR(255) NOT NULL,
     cantidad INT NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     total DECIMAL(12, 2) GENERATED ALWAYS AS (cantidad * precio) STORED,
+    cliente VARCHAR(255),
+    correo VARCHAR(255),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -190,7 +192,7 @@ podman volume rm pgdata
 
 o borrar la carpeta local pgdata/.
 
-##### Archivo de creación de contnedores
+##### Archivo de creación de contenedores
 El contenido del archivo YAML es el siguiente:
 
 ```yaml
@@ -308,6 +310,36 @@ Se verifica la existencia de la tabla pedido con la siguiente instrucción
 ```bash
 podman exec -it postgres psql -U demo -d demo -c "\d pedidos"
 ```
+
+##### Crear JDBC Sink Connect
+Crear el conector con la instrucción siguiente
+```bash
+curl -X POST http://localhost:8083/connectors \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "jdbc-sink-pedidos",
+    "config": {
+      "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+      "tasks.max": "1",
+      "topics": "pedidos",
+      "connection.url": "jdbc:postgresql://postgres:5432/demo",
+      "connection.user": "demo",
+      "connection.password": "demo",
+      "auto.create": "false",
+      "auto.evolve": "true",
+      "insert.mode": "insert",
+      "pk.mode": "none",
+      "table.name.format": "pedidos",
+
+      "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+      "key.converter.schemas.enable": "false",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter.schemas.enable": "true"
+    }
+  }'
+  ```
+  Cada vez que se crea un pedido se deben esperar al menos 5 minutos para ver reflejado el registro en la base de datos
+
 ### ⚙️ Configuración del proyecto
 Archivo application.properties (extracto):
 
@@ -317,15 +349,6 @@ server.port=8084
 
 # Kafka
 spring.kafka.bootstrap-servers=172.24.119.148:9092
-spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
-spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
-
-spring.kafka.consumer.group-id=facturacion-group
-spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
-spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.JsonDeserializer
-
-# Tópicos
-kafka.topic.pedidos=pedidos
 ```
 #### 🧠 Nota:
 La IP 172.24.119.148 corresponde a la dirección del entorno WSL.
@@ -345,7 +368,7 @@ En el entorno **WSL**, con los contenedores de Kafka levantados mediante `podman
 podman exec -it kafka1 kafka-topics --bootstrap-server localhost:9092 --list
 ```
 
-Si el tópico no aparece en la lista anterior, créalo manualmente ejecutando este comando dentro del mismo contenedor kafka1:
+Si el tópico no aparece en la lista anterior, créarlo manualmente ejecutando este comando:
 #### ⚙️ Crear el tópico pedidos (si no existe)
 
 ```bash
@@ -380,6 +403,8 @@ Deben conectar todos a la misma red
 podman exec -it kafka1 bash -lc 'getent hosts postgres || echo NO-RESUELVE'
 ```
 
+
+
 ## 🚀 Operación
 ### Levantar Kafka en Podman
 ```bash
@@ -402,18 +427,12 @@ Se puede usar Postman o curl:
 curl -X POST http://localhost:8083/pedidos \
 -H "Content-Type: application/json" \
 -d '{
-      "id":5,
-      "producto": "Computador",
-      "cantidad":1,
-      "precio":2500000,
-      "usuario":{
-          "nombre": "Juan",
-          "apellido":"Lopez",
-          "tipoDocumento":"CC",
-          "numeroDocumento":"123456789",
-          "correo":"jlopez@hotmail.com"
-      }
-  }'
+    "producto": "Computador",
+    "cantidad": 1,
+    "precio": 2500000,
+    "cliente": "Juan",
+    "correo":"juan@hotmail.com"
+}'
 ```
 
 ### Visualizar la recepción en el servicio REST
