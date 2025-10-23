@@ -382,6 +382,10 @@ podman exec -it kafka1 kafka-topics \
   --topic pedidos
 ```
 
+La creación de este tópico puede desplegar una infraestructura como la siguiente:
+
+![Modelo de Despliegue Posible del Tópico Pedidos.](docs/images/arquitectura/modeloDesplieguePosibleTopicoPedidos.png)
+
 
 ## 📋 Configuración - Crear Archivo de Creación de Tabla de Pedidos
 
@@ -659,6 +663,10 @@ podman exec -it kafka1 bash -lc 'getent hosts postgres || echo NO-RESUELVE'
 
 
 ## 🚀 Operación
+
+La ejecución del proyecta sigue el siguiente flujo de información
+![Modelo de Flujo de información.](docs/images/arquitectura/modeloFlujoInformacion.png)
+
 ### Levantar Kafka en Podman
 ```bash
 podman-compose -f podman-compose-kafka-3brokers.yml up -d
@@ -710,6 +718,13 @@ En el log de la aplicación se verá algo como:
 ```bash
 Pedido consumido en FACTURACIÓN: Pedido(id=
 ```
+
+### Visualizar el registro en la base de datos
+```bash
+podman exec -it postgres psql -U demo -d demo -c "SELECT * FROM pedidos;"
+ ```
+
+
 ## 🖼️ Resultado en Imágenes
 ### Verificación de los contenedores
 ![Toma de pantalla de la ejecución del comando ```podman ps``` mostrando los contenedores reqeridos funcionando.](docs/images/pruebas-kafka/podmanps.png)
